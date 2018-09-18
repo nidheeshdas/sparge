@@ -9,6 +9,9 @@ import (
 	"github.com/labstack/echo/middleware"
 
 	"github.com/urfave/cli"
+	"github.com/wellington/go-libsass"
+	"io/ioutil"
+	"bytes"
 )
 
 const (
@@ -29,7 +32,7 @@ _______________________________/__\__\__\
 // version set by LDFLAGS
 var version string
 
-func start(root string, port int, redirectHttps bool, logFormat string) {
+func start(root string, port int, redirectHttps bool, logFormat string, scssFilePath string) {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -40,6 +43,19 @@ func start(root string, port int, redirectHttps bool, logFormat string) {
 	if redirectHttps {
 		e.Pre(middleware.HTTPSRedirect())
 	}
+
+	e.GET("/css", func(context echo.Context) error {
+		start := []byte(context.QueryParam("start"))
+		end := []byte(context.QueryParam("end"))
+		scss, _ := ioutil.ReadFile(scssFilePath)
+		input := append(start, scss...)
+		input = append(input, end...)
+		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
+
+		sass.Run()
+		//context.Response().Write([]byte(css))
+		return nil
+	})
 
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:   root,
@@ -69,7 +85,7 @@ func main() {
 			Name:  "start",
 			Usage: "Start the SPA server",
 			Action: func(c *cli.Context) error {
-				start(c.String("dir"), c.Int("port"), c.Bool("https-redirect"), c.String("log-format")+"\n")
+				start(c.String("dir"), c.Int("port"), c.Bool("https-redirect"), c.String("log-format")+"\n", c.String("scss"))
 				return nil
 			},
 			Flags: []cli.Flag{
@@ -78,6 +94,12 @@ func main() {
 					Value:  "./public",
 					Usage:  "Directory from which to serve files.",
 					EnvVar: "SPARGE_DIR",
+				},
+				cli.StringFlag{
+					Name:   "scss, s",
+					Value:  "./public/styles.scss",
+					Usage:  "SCSS file to use for /css?start=&end= endpoint",
+					EnvVar: "SPARGE_SCSS",
 				},
 				cli.StringFlag{
 					Name:   "port, p",
