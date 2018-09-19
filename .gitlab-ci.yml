@@ -1,4 +1,4 @@
-image: restra/golang-docker-gitlabci
+image: registry.upzak.com/open-source/images/golang-alpine-dind-gpp-glide-kubectl:latest
 stages:
   - release
 
@@ -22,7 +22,6 @@ release:
     - docker
   stage: release
   script:
-    - apt install g++
     - GOOS=linux CGO_ENABLED=1 go build -tags "dev netgo" -ldflags "-X main.version=1.5.0" -o sparge  main.go
     - export TAG=$(cat version-major-minor.txt).$(date +%s)
     - docker build --network host -t $CONTAINER_RELEASE_IMAGE:$TAG -t $CONTAINER_RELEASE_IMAGE:latest .
