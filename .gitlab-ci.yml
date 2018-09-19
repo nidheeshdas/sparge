@@ -26,7 +26,6 @@ release:
     - GOOS=linux CGO_ENABLED=1 go build -tags "dev netgo" -ldflags "-X main.version=1.5.0" -o sparge  main.go
     - export TAG=$(cat version-major-minor.txt).$(date +%s)
     - docker build --network host -t $CONTAINER_RELEASE_IMAGE:$TAG -t $CONTAINER_RELEASE_IMAGE:latest .
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.upzak.com
     - docker push $CONTAINER_RELEASE_IMAGE:$TAG
     - docker push $CONTAINER_RELEASE_IMAGE:latest
   only:
