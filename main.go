@@ -8,10 +8,10 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
+	"bytes"
 	"github.com/urfave/cli"
 	"github.com/wellington/go-libsass"
 	"io/ioutil"
-	"bytes"
 )
 
 const (
@@ -50,10 +50,9 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 		scss, _ := ioutil.ReadFile(scssFilePath)
 		input := append(start, scss...)
 		input = append(input, end...)
+		context.Response().Header().Add("content-type", "text/css")
 		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
-
 		sass.Run()
-		//context.Response().Write([]byte(css))
 		return nil
 	})
 
