@@ -47,10 +47,19 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 	e.GET("/css", func(context echo.Context) error {
 		start := []byte(context.QueryParam("start"))
 		end := []byte(context.QueryParam("end"))
+		out := context.QueryParam("out")
+
 		scss, _ := ioutil.ReadFile(scssFilePath)
 		input := append(start, scss...)
 		input = append(input, end...)
+
 		context.Response().Header().Add("content-type", "text/css")
+
+		if out == "scss" {
+			context.Response().Write([]byte(input))
+			return nil
+		}
+
 		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
 		sass.Run()
 		return nil
