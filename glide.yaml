@@ -1,11 +1,10 @@
-package: github.com/BrewdHQ/sparge
+package: github.com/nidheeshdas/sparge
 import:
 - package: github.com/urfave/cli
   version: ^1.20.0
 - package: github.com/labstack/echo
-  # TODO: restore version number after next echo release
-  # below is the previous release version used
-  # version: ^3.2.6
   version: 3cdcc65b23540bffa1d271a22e77014f627de569
   subpackages:
   - '...'
+- package: github.com/wellington/go-libsass
+  version: ^0.9.2

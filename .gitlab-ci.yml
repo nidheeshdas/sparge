@@ -1,0 +1,32 @@
+image: restra/golang-docker-gitlabci
+stages:
+  - release
+
+services:
+  - docker:dind
+
+variables:
+  APP_NAME: sparge
+  APP_VERSION: 0.0.1
+  CONTAINER_RELEASE_IMAGE: registry.upzak.com/open-source/images/alpine-sparge
+
+before_script:
+  - mkdir -p /go/src/github.com/nidheeshdas/sparge
+  - cp -r . /go/src/github.com/nidheeshdas/sparge
+  - cd /go/src/github.com/nidheeshdas/sparge
+
+release:
+  variables: 
+    DOCKER_HOST: tcp://localhost:2375
+  tags:
+    - docker
+  stage: release
+  script:
+    - GOOS=linux CGO_ENABLED=1 go build -tags "dev netgo" -ldflags "-X main.version=1.5.0" -o sparge  main.go
+    - export TAG=$(cat version-major-minor.txt).$(date +%s)
+    - docker build --network host -t $CONTAINER_RELEASE_IMAGE:$TAG -t $CONTAINER_RELEASE_IMAGE:latest .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.upzak.com
+    - docker push $CONTAINER_RELEASE_IMAGE:$TAG
+    - docker push $CONTAINER_RELEASE_IMAGE:latest
+  only:
+  - master

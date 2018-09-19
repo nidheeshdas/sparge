@@ -1,6 +1,8 @@
-FROM alpine:3.6
-
-EXPOSE 8080
-ADD sparge /
-ADD public public
-CMD [ "./sparge", "start" ]
+FROM alpine
+EXPOSE 8083
+COPY sparge /bin/
+ENTRYPOINT ["/bin/sparge", "start", "-d", "/app", "-p", "8083", "-s", "/app/styles.scss"]
+RUN apk --update upgrade && \
+    apk add libsass libc6-compat && \
+    rm -rf /var/cache/apk/* && \
+    cp /usr/lib/libsass.so.1 /usr/lib/libsass.so.0
