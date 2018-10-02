@@ -81,7 +81,7 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 		fmt.Println("processing scss with basepaths: " + scssBaseDir + " and " + root)
 
 		sass, _ := libsass.New(context.Response(), bytes.NewBuffer(input))
-		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}), libsass.WithSyntax(libsass.SCSSSyntax))
+		sass.Option(libsass.IncludePaths([]string{scssBaseDir}), libsass.WithSyntax(libsass.SCSSSyntax))
 
 		err := sass.Run()
 		if err != nil {
