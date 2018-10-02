@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli"
 	"github.com/wellington/go-libsass"
 	"io/ioutil"
+	"path"
 )
 
 const (
@@ -53,6 +54,8 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 		input := append(start, scss...)
 		input = append(input, end...)
 
+		scssBaseDir := path.Dir(scssFilePath)
+
 		context.Response().Header().Add("content-type", "text/css")
 
 		if out == "scss" {
@@ -61,6 +64,7 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 		}
 
 		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
+		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}))
 		sass.Run()
 		return nil
 	})
