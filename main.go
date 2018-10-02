@@ -12,7 +12,6 @@ import (
 	"github.com/urfave/cli"
 	"github.com/wellington/go-libsass"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"path"
 )
@@ -38,8 +37,8 @@ var version string
 func start(root string, port int, redirectHttps bool, logFormat string, scssFilePath string) {
 	defer func() {
 		if e := recover(); e != nil {
-			log.Println("Recovered an error: top")
-			log.Println(e)
+			fmt.Printf("Recovered an error: top")
+			fmt.Println(e)
 		}
 	}()
 
@@ -57,8 +56,8 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 	e.GET("/css", func(context echo.Context) error {
 		defer func() {
 			if e := recover(); e != nil {
-				log.Println("Recovered an error: /css")
-				log.Println(e)
+				fmt.Printf("Recovered an error: /css")
+				fmt.Println(e)
 			}
 		}()
 		start := []byte(context.QueryParam("start"))
@@ -71,7 +70,7 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 
 		scssBaseDir := path.Dir(scssFilePath)
 
-		context.Response().Header().Set("content-type", "text/css")
+		context.Response().Header().Set(echo.HeaderContentType, "text/css")
 		context.Response().WriteHeader(http.StatusOK)
 
 		if out == "scss" {
@@ -79,9 +78,18 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 			return nil
 		}
 
+		fmt.Println("processing scss with basepaths: " + scssBaseDir + " and " + root)
+
 		sass, _ := libsass.New(context.Response(), bytes.NewBuffer(input))
 		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}), libsass.WithSyntax(libsass.SCSSSyntax))
-		return sass.Run()
+
+		err := sass.Run()
+		if err != nil {
+			fmt.Println("sass ran with error")
+			fmt.Println(err)
+			return echo.NewHTTPError(500, err)
+		}
+		return nil
 	})
 
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
@@ -102,8 +110,8 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 func main() {
 	defer func() {
 		if e := recover(); e != nil {
-			log.Println("Recovered an error: Main")
-			log.Println(e)
+			fmt.Printf("Recovered an error: Main")
+			fmt.Println(e)
 		}
 	}()
 	app := cli.NewApp()
