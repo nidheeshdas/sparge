@@ -8,11 +8,10 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
-	"bytes"
 	"github.com/urfave/cli"
-	"github.com/wellington/go-libsass"
 	"io/ioutil"
 	"net/http"
+	"os/exec"
 	"path"
 )
 
@@ -78,17 +77,29 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 			return nil
 		}
 
-		fmt.Println("processing scss with basepaths: " + scssBaseDir + " and " + root)
+		fmt.Println("processing scss with basepaths: " + scssBaseDir)
 
-		sass, _ := libsass.New(context.Response(), bytes.NewBuffer(input))
-		sass.Option(libsass.IncludePaths([]string{scssBaseDir}), libsass.WithSyntax(libsass.SCSSSyntax))
+		n := time.Now()
+		//cmd:=exec.Command("/usr/local/bin/sass", "--stdin", "-s", "compressed", "-I", scssBaseDir)
+		cmd := exec.Command("/usr/bin/sassc", "-s", "-t", "compressed", "-I", scssBaseDir)
+		cmd.Stdout = context.Response()
+		inpipe, _ := cmd.StdinPipe()
+		inpipe.Write(input)
+		inpipe.Close()
+		cmd.Run()
 
-		err := sass.Run()
-		if err != nil {
-			fmt.Println("sass ran with error")
-			fmt.Println(err)
-			return echo.NewHTTPError(500, err)
-		}
+		t := time.Since(n)
+		fmt.Println(t.String())
+
+		//sass, _ := libsass.New(context.Response(), bytes.NewBuffer(input))
+		//sass.Option(libsass.IncludePaths([]string{scssBaseDir}), libsass.WithSyntax(libsass.SCSSSyntax))
+		//
+		//err := sass.Run()
+		//if err != nil {
+		//	fmt.Println("sass ran with error")
+		//	fmt.Println(err)
+		//	return echo.NewHTTPError(500, err)
+		//}
 		return nil
 	})
 
