@@ -64,9 +64,8 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 		}
 
 		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
-		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}))
-		sass.Run()
-		return nil
+		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}), libsass.WithSyntax(libsass.SCSSSyntax))
+		return sass.Run()
 	})
 
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
