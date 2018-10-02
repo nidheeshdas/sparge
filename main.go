@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli"
 	"github.com/wellington/go-libsass"
 	"io/ioutil"
+	"log"
 	"path"
 )
 
@@ -46,6 +47,12 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 	}
 
 	e.GET("/css", func(context echo.Context) error {
+		defer func() {
+			if e := recover(); e != nil {
+				log.Println("Recovered an error")
+				log.Println(e)
+			}
+		}()
 		start := []byte(context.QueryParam("start"))
 		end := []byte(context.QueryParam("end"))
 		out := context.QueryParam("out")
