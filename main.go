@@ -35,6 +35,13 @@ _______________________________/__\__\__\
 var version string
 
 func start(root string, port int, redirectHttps bool, logFormat string, scssFilePath string) {
+	defer func() {
+		if e := recover(); e != nil {
+			log.Println("Recovered an error: top")
+			log.Println(e)
+		}
+	}()
+
 	e := echo.New()
 	e.HideBanner = true
 
@@ -49,7 +56,7 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 	e.GET("/css", func(context echo.Context) error {
 		defer func() {
 			if e := recover(); e != nil {
-				log.Println("Recovered an error")
+				log.Println("Recovered an error: /css")
 				log.Println(e)
 			}
 		}()
@@ -91,6 +98,12 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 }
 
 func main() {
+	defer func() {
+		if e := recover(); e != nil {
+			log.Println("Recovered an error: Main")
+			log.Println(e)
+		}
+	}()
 	app := cli.NewApp()
 	app.Name = "sparge"
 	app.Usage = "A SPA (single-page application) server"
