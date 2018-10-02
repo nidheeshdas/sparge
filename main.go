@@ -13,6 +13,7 @@ import (
 	"github.com/wellington/go-libsass"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"path"
 )
 
@@ -70,14 +71,15 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 
 		scssBaseDir := path.Dir(scssFilePath)
 
-		context.Response().Header().Add("content-type", "text/css")
+		context.Response().Header().Set("content-type", "text/css")
+		context.Response().WriteHeader(http.StatusOK)
 
 		if out == "scss" {
 			context.Response().Write([]byte(input))
 			return nil
 		}
 
-		sass, _ := libsass.New(context.Response().Writer, bytes.NewBuffer(input))
+		sass, _ := libsass.New(context.Response(), bytes.NewBuffer(input))
 		sass.Option(libsass.IncludePaths([]string{scssBaseDir, root}), libsass.WithSyntax(libsass.SCSSSyntax))
 		return sass.Run()
 	})
