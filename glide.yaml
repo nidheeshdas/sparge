@@ -6,5 +6,3 @@ import:
   version: 3cdcc65b23540bffa1d271a22e77014f627de569
   subpackages:
   - '...'
-- package: github.com/wellington/go-libsass
-  version: ^0.9.2
