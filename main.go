@@ -47,6 +47,9 @@ func start(root string, port int, redirectHttps bool, logFormat string, scssFile
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: logFormat,
 	}))
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 9,
+	}))
 
 	if redirectHttps {
 		e.Pre(middleware.HTTPSRedirect())
